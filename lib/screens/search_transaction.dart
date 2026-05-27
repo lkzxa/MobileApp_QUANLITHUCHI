@@ -55,7 +55,11 @@ class TransactionSearchDelegate extends SearchDelegate {
 
     if (results.isEmpty) {
       return Center(
-        child: Text(query.isEmpty ? "Nhập từ khóa để tìm..." : "Không tìm thấy kết quả nào!"),
+        child: Text(
+          query.isEmpty
+              ? "Nhập từ khóa để tìm..."
+              : "Không tìm thấy kết quả nào!",
+        ),
       );
     }
 
@@ -65,22 +69,34 @@ class TransactionSearchDelegate extends SearchDelegate {
         final transaction = results[index];
         return ListTile(
           leading: CircleAvatar(
-            backgroundColor: transaction.isExpense ? Colors.red.withOpacity(0.2) : Colors.green.withOpacity(0.2),
+            backgroundColor: transaction.isExpense
+                ? Colors.red.withValues(alpha: 0.2)
+                : Colors.green.withValues(alpha: 0.2),
             child: Icon(
               transaction.isExpense ? Icons.arrow_downward : Icons.arrow_upward,
               color: transaction.isExpense ? Colors.red : Colors.green,
             ),
           ),
-          title: Text(transaction.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          title: Text(
+            transaction.title,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           subtitle: Text(DateFormat('dd/MM/yyyy').format(transaction.date)),
           trailing: Text(
-            NumberFormat.simpleCurrency(locale: 'vi_VN').format(transaction.amount),
-            style: TextStyle(fontWeight: FontWeight.bold, color: transaction.isExpense ? Colors.red : Colors.green),
+            NumberFormat.simpleCurrency(
+              locale: 'vi_VN',
+            ).format(transaction.amount),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: transaction.isExpense ? Colors.red : Colors.green,
+            ),
           ),
           onTap: () {
             // Cho phép bấm vào để Sửa ngay tại màn hình tìm kiếm
             Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => AddTransactionScreen(transaction: transaction)),
+              MaterialPageRoute(
+                builder: (_) => AddTransactionScreen(transaction: transaction),
+              ),
             );
           },
         );

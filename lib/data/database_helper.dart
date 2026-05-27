@@ -1,6 +1,7 @@
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite/sql.dart';
-import 'package:path/path.dart';
+import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/transaction_model.dart';
 
 class DatabaseHelper {
@@ -10,79 +11,72 @@ class DatabaseHelper {
 
   DatabaseHelper._internal();
 
-  static Database? _database;
+  static const _storageKey = 'transactions';
 
-  //lấy database ra dùng nếu chưa có (null) thì tạo mới, có rồi thì trả về
-  Future<Database> get database async {
-    if (_database != null) return _database!;
+  Future<SharedPreferences> get _prefs => SharedPreferences.getInstance();
 
-    //nếu chưa có thì khởi tạo
-    _database = await _initDB();
-    return _database!;
+  Future<void> _saveTransactions(List<TransactionModel> transactions) async {
+    final prefs = await _prefs;
+    final data = transactions.map((item) => item.toMap()).toList();
+    await prefs.setString(_storageKey, jsonEncode(data));
   }
 
-  Future<Database> _initDB() async {
-    //1 tìm đuognừ dẫn an toàn trên đt để lưu file
-    String path = join(await getDatabasesPath(), 'thuchi.db');
-
-    //2 mở database
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: _onCreate, // gọi hàm bên dưới
-    );
-  }
-
-  //hàm tạo bảng
-  Future _onCreate(Database db, int version) async {
-    await db.execute('''
-      CREATE TABLE transactions(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT,
-        amount REAL,
-        date TEXT,
-        isExpense INTEGER
-      )
-    ''');
-  }
-
-  //CÁC HÀM XỬ LÍ DỮ LIỆU
-  //1. THÊM GIAO DỊCH MỚI
   Future<int> insertTransaction(TransactionModel transaction) async {
-    Database db = await database; //lấy kêt nối
-    //gọi lenehjj insert , chuyển object -> map để lưuu
-    return await db.insert('transactions', transaction.toMap());
+    final transactions = await getTransactions();
+    final nextId = transactions.isEmpty
+        ? 1
+        : transactions
+                  .map((item) => item.id ?? 0)
+                  .reduce((value, item) => value > item ? value : item) +
+              1;
+
+    final newTransaction = TransactionModel(
+      id: nextId,
+      title: transaction.title,
+      amount: transaction.amount,
+      date: transaction.date,
+      isExpense: transaction.isExpense,
+    );
+
+    transactions.add(newTransaction);
+    await _saveTransactions(transactions);
+    return nextId;
   }
 
-  //2 lấy toàn bộ danh sách giao dịch
   Future<List<TransactionModel>> getTransactions() async {
-    Database db = await database;
+    final prefs = await _prefs;
+    final rawData = prefs.getString(_storageKey);
+    if (rawData == null || rawData.isEmpty) return [];
 
-    //lấy dữ liệu và sắp xếp theo ngày giảm dần
-    final List<Map<String, dynamic>> maps = await db.query('transactions',orderBy:'date DESC');
-    
-    //chuyển đổi ngược lại từ list<map>sang list<transactionModel>
-    return List.generate(maps.length, (i){
-      return TransactionModel.fromMap(maps[i]);
-    });
+    final decoded = jsonDecode(rawData);
+    if (decoded is! List) return [];
+
+    final transactions = decoded
+        .whereType<Map>()
+        .map(
+          (item) => TransactionModel.fromMap(Map<String, dynamic>.from(item)),
+        )
+        .toList();
+
+    transactions.sort((a, b) => b.date.compareTo(a.date));
+    return transactions;
   }
-  //3 xóa giao dịch
-  Future<int> deleteTransaction(int id) async{
-    Database db = await database;
-    return await db.delete(
-      'transactions',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+
+  Future<int> deleteTransaction(int id) async {
+    final transactions = await getTransactions();
+    final originalLength = transactions.length;
+    transactions.removeWhere((item) => item.id == id);
+    await _saveTransactions(transactions);
+    return originalLength - transactions.length;
   }
-  // 4. Cập nhật giao dịch (Sửa)
+
   Future<int> updateTransaction(TransactionModel transaction) async {
-    Database db = await database;
-    return await db.update(
-      'transactions',
-      transaction.toMap(),
-      where: 'id = ?',
-      whereArgs: [transaction.id],
-    );
+    final transactions = await getTransactions();
+    final index = transactions.indexWhere((item) => item.id == transaction.id);
+    if (index == -1) return 0;
+
+    transactions[index] = transaction;
+    await _saveTransactions(transactions);
+    return 1;
   }
 }

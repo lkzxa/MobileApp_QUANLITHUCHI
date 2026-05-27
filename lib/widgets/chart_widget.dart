@@ -12,11 +12,16 @@ class ChartWidget extends StatelessWidget {
     final provider = Provider.of<TransactionProvider>(context);
 
     // 1. Lọc và gom nhóm dữ liệu (Chỉ lấy các khoản CHI)
-    final expenseTransactions = provider.transactions.where((t) => t.isExpense).toList();
+    final expenseTransactions = provider.transactions
+        .where((t) => t.isExpense)
+        .toList();
 
     if (expenseTransactions.isEmpty) {
       return const Center(
-        child: Text("Chưa có khoản chi tiêu nào để vẽ!", style: TextStyle(color: Colors.grey)),
+        child: Text(
+          "Chưa có khoản chi tiêu nào để vẽ!",
+          style: TextStyle(color: Colors.grey),
+        ),
       );
     }
 
@@ -32,8 +37,12 @@ class ChartWidget extends StatelessWidget {
     // 2. Tạo dữ liệu vẽ
     List<PieChartSectionData> sections = [];
     List<Color> colors = [
-      Colors.red.shade400, Colors.blue.shade400, Colors.green.shade400,
-      Colors.orange.shade400, Colors.purple.shade400, Colors.teal.shade400
+      Colors.red.shade400,
+      Colors.blue.shade400,
+      Colors.green.shade400,
+      Colors.orange.shade400,
+      Colors.purple.shade400,
+      Colors.teal.shade400,
     ];
 
     int index = 0;
@@ -45,7 +54,11 @@ class ChartWidget extends StatelessWidget {
           value: value,
           title: '${percent.toStringAsFixed(0)}%', // Hiện số %
           radius: 80, // Độ lớn bán kính
-          titleStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+          titleStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
       );
       index++;
@@ -72,9 +85,15 @@ class ChartWidget extends StatelessWidget {
               String key = dataMap.keys.elementAt(i);
               double value = dataMap[key]!;
               return ListTile(
-                leading: Container(width: 16, height: 16, color: colors[i % colors.length]),
+                leading: Container(
+                  width: 16,
+                  height: 16,
+                  color: colors[i % colors.length],
+                ),
                 title: Text(key),
-                trailing: Text(NumberFormat.simpleCurrency(locale: 'vi_VN').format(value)),
+                trailing: Text(
+                  NumberFormat.simpleCurrency(locale: 'vi_VN').format(value),
+                ),
               );
             },
           ),

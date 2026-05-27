@@ -18,6 +18,7 @@ class TransactionProvider with ChangeNotifier {
     _isDarkMode = !_isDarkMode;
     notifyListeners();
   }
+
   // 1. Chỉ lấy giao dịch thuộc tháng và năm đang chọn
   List<TransactionModel> get transactions {
     return _allTransactions.where((tx) {
@@ -47,8 +48,10 @@ class TransactionProvider with ChangeNotifier {
   DateTime get selectedDate => _selectedDate;
 
   // Các hàm gợi ý (Giữ nguyên)
-  List<String> get titleSuggestions => _allTransactions.map((e) => e.title).toSet().toList();
-  List<String> get amountSuggestions => _allTransactions.map((e) => e.amount.toInt().toString()).toSet().toList();
+  List<String> get titleSuggestions =>
+      _allTransactions.map((e) => e.title).toSet().toList();
+  List<String> get amountSuggestions =>
+      _allTransactions.map((e) => e.amount.toInt().toString()).toSet().toList();
 
   // --- HÀM XỬ LÝ ---
 
