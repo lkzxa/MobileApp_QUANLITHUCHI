@@ -1,39 +1,52 @@
-# Quản Lý Thu Chi
+# Personal Finance Tracker
 
-Ứng dụng Flutter/Dart quản lý thu chi cá nhân, lưu dữ liệu cục bộ bằng SQLite và hiển thị thống kê theo tháng.
+A Flutter/Dart personal finance tracker for managing income and expenses. The app stores data locally and shows monthly summaries with charts.
 
-## Tính năng
+## Features
 
-- Thêm, sửa, xóa giao dịch thu/chi.
-- Lọc giao dịch theo tháng.
-- Tìm kiếm giao dịch theo tiêu đề.
-- Tự động chọn icon theo nội dung giao dịch.
-- Biểu đồ chi tiêu bằng `fl_chart`.
-- Hỗ trợ giao diện sáng/tối.
+- Add, edit, and delete income or expense transactions.
+- Filter transactions by month.
+- Search transactions by title.
+- Automatically choose icons based on transaction content.
+- View expense charts with `fl_chart`.
+- Switch between light and dark mode.
+- Store data locally in the device or browser.
 
-## Công nghệ
+## Tech Stack
 
 - Flutter
 - Dart
 - Provider
-- Local storage với `shared_preferences`
-- `intl` cho định dạng ngày và tiền tệ tiếng Việt
+- Local storage with `shared_preferences`
+- `intl` for Vietnamese date and currency formatting
+- `fl_chart` for visual expense charts
 
-## Chạy project
+## Getting Started
 
 ```powershell
 flutter pub get
 flutter run
 ```
 
-Nếu project được clone từ GitHub mà thiếu thư mục nền tảng Android, chạy:
+To run the web version:
 
 ```powershell
-flutter create --platforms=android .
 flutter pub get
-flutter run
+flutter run -d chrome
 ```
 
-## Ghi chú setup
+To build the web app:
 
-Project lưu dữ liệu cục bộ trên thiết bị/trình duyệt. Khi chạy web, dữ liệu nằm trong local storage của browser đang dùng.
+```powershell
+flutter build web
+```
+
+To build an Android debug APK:
+
+```powershell
+flutter build apk --debug
+```
+
+## Storage Notes
+
+The app stores data locally. On Flutter Web, transactions are saved in the current browser's local storage through `shared_preferences`. Data may be cleared if the browser's site data is deleted, or if the app is opened in another browser/profile.
